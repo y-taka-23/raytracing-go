@@ -2,6 +2,7 @@ package raytracing
 
 import (
 	"fmt"
+	"io"
 )
 
 const (
@@ -9,14 +10,15 @@ const (
 	imageHeight = 256
 )
 
-func Run() error {
+func Run(stdout, stderr io.Writer) error {
 
-	fmt.Println("P3")
-	fmt.Printf("%d %d\n", imageWidth, imageHeight)
-	fmt.Println(255)
+	fmt.Fprintln(stdout, "P3")
+	fmt.Fprintf(stdout, "%d %d\n", imageWidth, imageHeight)
+	fmt.Fprintln(stdout, 255)
 
 	for j := imageHeight - 1; j >= 0; j-- {
 		for i := 0; i < imageWidth; i++ {
+			fmt.Fprintf(stderr, "\rScanlines remaining: %d", j)
 
 			r := float64(i) / (imageWidth - 1)
 			g := float64(j) / (imageHeight - 1)
@@ -26,9 +28,10 @@ func Run() error {
 			ig := int(g * 255.999)
 			ib := int(b * 255.999)
 
-			fmt.Printf("%d %d %d\n", ir, ig, ib)
+			fmt.Fprintf(stdout, "%d %d %d\n", ir, ig, ib)
 		}
 	}
+	fmt.Fprintln(stderr, "\nDone.")
 
 	return nil
 }
