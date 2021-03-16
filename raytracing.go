@@ -19,16 +19,12 @@ func Run(stdout, stderr io.Writer) error {
 	for j := imageHeight - 1; j >= 0; j-- {
 		for i := 0; i < imageWidth; i++ {
 			fmt.Fprintf(stderr, "\rScanlines remaining: %d", j)
-
-			r := float64(i) / (imageWidth - 1)
-			g := float64(j) / (imageHeight - 1)
-			b := 0.25
-
-			ir := int(r * 255.999)
-			ig := int(g * 255.999)
-			ib := int(b * 255.999)
-
-			fmt.Fprintf(stdout, "%d %d %d\n", ir, ig, ib)
+			c := newColor(
+				float64(i)/(imageWidth-1),
+				float64(j)/(imageHeight-1),
+				0.25,
+			)
+			writeColor(stdout, c)
 		}
 	}
 	fmt.Fprintln(stderr, "\nDone.")
