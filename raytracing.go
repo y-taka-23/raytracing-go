@@ -11,8 +11,8 @@ const (
 	imageWidth  = 384
 	imageHeight = int(imageWidth / aspectRatio)
 
-	viewportWidth  = 2
-	viewportHeight = viewportWidth / aspectRatio
+	viewportWidth  = viewportHeight * aspectRatio
+	viewportHeight = 2
 	focalLength    = 1
 )
 
