@@ -29,7 +29,7 @@ func (v vector) mul(t float64) vector {
 }
 
 func (v vector) div(t float64) vector {
-	return newVector(v.x/t, t*v.y/t, t*v.z/t)
+	return newVector(v.x/t, v.y/t, v.z/t)
 }
 
 func (v vector) dot(w vector) float64 {
@@ -50,4 +50,22 @@ func (v vector) length() float64 {
 
 func (v vector) normalize() vector {
 	return v.div(v.length())
+}
+
+type point vector
+
+func newPoint(x, y, z float64) point {
+	return point(newVector(x, y, z))
+}
+
+func origin() point {
+	return newPoint(0, 0, 0)
+}
+
+func (p point) to(q point) vector {
+	return newVector(q.x-p.x, q.y-p.y, q.z-p.z)
+}
+
+func (p point) vector() vector {
+	return origin().to(p)
 }
