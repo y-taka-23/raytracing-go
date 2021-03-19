@@ -3,6 +3,7 @@ package raytracing
 import (
 	"fmt"
 	"io"
+	"math"
 )
 
 const (
@@ -17,6 +18,10 @@ const (
 )
 
 func Run(stdout, stderr io.Writer) error {
+
+	world := newHitters().
+		add(newSphere(newPoint(0, 0, -1), 0.5)).
+		add(newSphere(newPoint(0, -100.5, -1), 100))
 
 	horizontal := newVector(viewportWidth, 0, 0)
 	vertical := newVector(0, viewportHeight, 0)
@@ -34,7 +39,7 @@ func Run(stdout, stderr io.Writer) error {
 			dir := origin().to(lowerLeftCorner).
 				add(horizontal.mul(u)).
 				add(vertical.mul(v))
-			c := rayColor(newRay(origin(), dir))
+			c := rayColor(newRay(origin(), dir), world)
 			writeColor(stdout, c)
 		}
 	}
@@ -43,10 +48,9 @@ func Run(stdout, stderr io.Writer) error {
 	return nil
 }
 
-func rayColor(r ray) color {
-	if t, ok := r.hitSphere(newPoint(0, 0, -1), 0.5); ok {
-		n := newPoint(0, 0, -1).to(r.at(t)).normalize()
-		return newColor(0.5*(n.x+1), 0.5*(n.y+1), 0.5*(n.z+1))
+func rayColor(r ray, world hitters) color {
+	if hr, ok := world.hit(r, 0, math.MaxFloat64); ok {
+		return newColor(0.5*(hr.normal.x+1), 0.5*(hr.normal.y+1), 0.5*(hr.normal.z+1))
 	}
 	unit := r.direction.normalize()
 	x := 0.5 * (unit.y + 1)
