@@ -11,10 +11,6 @@ const (
 
 	imageWidth  = 384
 	imageHeight = int(imageWidth / aspectRatio)
-
-	viewportWidth  = viewportHeight * aspectRatio
-	viewportHeight = 2
-	focalLength    = 1
 )
 
 func Run(stdout, stderr io.Writer) error {
@@ -23,9 +19,7 @@ func Run(stdout, stderr io.Writer) error {
 		add(newSphere(newPoint(0, 0, -1), 0.5)).
 		add(newSphere(newPoint(0, -100.5, -1), 100))
 
-	horizontal := newVector(viewportWidth, 0, 0)
-	vertical := newVector(0, viewportHeight, 0)
-	lowerLeftCorner := newPoint(-viewportWidth/2, -viewportHeight/2, -focalLength)
+	cam := defaultCamera()
 
 	fmt.Fprintln(stdout, "P3")
 	fmt.Fprintf(stdout, "%d %d\n", imageWidth, imageHeight)
@@ -36,10 +30,7 @@ func Run(stdout, stderr io.Writer) error {
 			fmt.Fprintf(stderr, "\rScanlines remaining: %d", j)
 			u := float64(i) / float64(imageWidth-1)
 			v := float64(j) / float64(imageHeight-1)
-			dir := origin().to(lowerLeftCorner).
-				add(horizontal.mul(u)).
-				add(vertical.mul(v))
-			c := rayColor(newRay(origin(), dir), world)
+			c := rayColor(cam.castRay(u, v), world)
 			writeColor(stdout, c)
 		}
 	}

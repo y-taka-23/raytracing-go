@@ -66,10 +66,6 @@ func (p point) to(q point) vector {
 	return newVector(q.x-p.x, q.y-p.y, q.z-p.z)
 }
 
-func (p point) vector() vector {
-	return origin().to(p)
-}
-
 func (v vector) point() point {
 	return point(v)
 }

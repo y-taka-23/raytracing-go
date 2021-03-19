@@ -10,5 +10,5 @@ func newRay(p point, v vector) ray {
 }
 
 func (r ray) at(t float64) point {
-	return r.origin.vector().add(r.direction.mul(t)).point()
+	return origin().to(r.origin).add(r.direction.mul(t)).point()
 }
