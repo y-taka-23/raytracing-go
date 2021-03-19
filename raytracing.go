@@ -44,10 +44,11 @@ func Run(stdout, stderr io.Writer) error {
 }
 
 func rayColor(r ray) color {
-	if r.hitSphere(newPoint(0, 0, -1), 0.5) {
-		return newColor(1, 0, 0)
+	if t, ok := r.hitSphere(newPoint(0, 0, -1), 0.5); ok {
+		n := newPoint(0, 0, -1).to(r.at(t)).normalize()
+		return newColor(0.5*(n.x+1), 0.5*(n.y+1), 0.5*(n.z+1))
 	}
 	unit := r.direction.normalize()
-	t := 0.5 * (unit.y + 1)
-	return newColor((1-t)*1.0+t*0.5, (1-t)*1.0+t*0.7, (1-t)*1.0+t*1.0)
+	x := 0.5 * (unit.y + 1)
+	return newColor((1-x)*1.0+x*0.5, (1-x)*1.0+x*0.7, (1-x)*1.0+x*1.0)
 }
