@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/rand"
+	"time"
 )
 
 const (
@@ -11,6 +13,8 @@ const (
 
 	imageWidth  = 384
 	imageHeight = int(imageWidth / aspectRatio)
+
+	samplesPerPixel = 100
 )
 
 func Run(stdout, stderr io.Writer) error {
@@ -25,13 +29,19 @@ func Run(stdout, stderr io.Writer) error {
 	fmt.Fprintf(stdout, "%d %d\n", imageWidth, imageHeight)
 	fmt.Fprintln(stdout, 255)
 
+	rand.Seed(time.Now().UnixNano())
+
 	for j := imageHeight - 1; j >= 0; j-- {
 		for i := 0; i < imageWidth; i++ {
 			fmt.Fprintf(stderr, "\rScanlines remaining: %d", j)
-			u := float64(i) / float64(imageWidth-1)
-			v := float64(j) / float64(imageHeight-1)
-			c := rayColor(cam.castRay(u, v), world)
-			writeColor(stdout, c)
+			color := newColor(0, 0, 0)
+			for s := 0; s < samplesPerPixel; s++ {
+				u := (float64(i) + rand.Float64()) / float64(imageWidth-1)
+				v := (float64(j) + rand.Float64()) / float64(imageHeight-1)
+				c := rayColor(cam.castRay(u, v), world)
+				color = newColor(color.x+c.x, color.y+c.y, color.z+c.z)
+			}
+			writeColor(stdout, color, samplesPerPixel)
 		}
 	}
 	fmt.Fprintln(stderr, "\nDone.")
