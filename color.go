@@ -3,6 +3,7 @@ package raytracing
 import (
 	"fmt"
 	"io"
+	"math"
 )
 
 type color vector
@@ -23,8 +24,9 @@ func writeColor(w io.Writer, c color, samples int) {
 		return x
 	}
 
-	r := int(255 * clamp(c.x/float64(samples), 0, 0.999))
-	g := int(255 * clamp(c.y/float64(samples), 0, 0.999))
-	b := int(255 * clamp(c.z/float64(samples), 0, 0.999))
+	r := int(255 * clamp(math.Sqrt(c.x/float64(samples)), 0, 0.999))
+	g := int(255 * clamp(math.Sqrt(c.y/float64(samples)), 0, 0.999))
+	b := int(255 * clamp(math.Sqrt(c.z/float64(samples)), 0, 0.999))
+
 	fmt.Fprintf(w, "%d %d %d\n", r, g, b)
 }
