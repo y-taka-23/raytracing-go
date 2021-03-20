@@ -15,6 +15,7 @@ const (
 	imageHeight = int(imageWidth / aspectRatio)
 
 	samplesPerPixel = 100
+	maxDepth        = 50
 )
 
 func Run(stdout, stderr io.Writer) error {
@@ -38,7 +39,7 @@ func Run(stdout, stderr io.Writer) error {
 			for s := 0; s < samplesPerPixel; s++ {
 				u := (float64(i) + rand.Float64()) / float64(imageWidth-1)
 				v := (float64(j) + rand.Float64()) / float64(imageHeight-1)
-				c := rayColor(cam.castRay(u, v), world)
+				c := rayColor(cam.castRay(u, v), world, maxDepth)
 				color = newColor(color.x+c.x, color.y+c.y, color.z+c.z)
 			}
 			writeColor(stdout, color, samplesPerPixel)
@@ -49,11 +50,32 @@ func Run(stdout, stderr io.Writer) error {
 	return nil
 }
 
-func rayColor(r ray, world hitters) color {
-	if hr, ok := world.hit(r, 0, math.MaxFloat64); ok {
-		return newColor(0.5*(hr.normal.x+1), 0.5*(hr.normal.y+1), 0.5*(hr.normal.z+1))
+func rayColor(r ray, world hitters, depth int) color {
+
+	if depth <= 0 {
+		return newColor(0, 0, 0)
 	}
-	unit := r.direction.normalize()
-	x := 0.5 * (unit.y + 1)
-	return newColor((1-x)*1.0+x*0.5, (1-x)*1.0+x*0.7, (1-x)*1.0+x*1.0)
+
+	hr, ok := world.hit(r, 0, math.MaxFloat64)
+	if !ok {
+		unit := r.direction.normalize()
+		x := 0.5 * (unit.y + 1)
+		return newColor((1-x)*1.0+x*0.5, (1-x)*1.0+x*0.7, (1-x)*1.0+x*1.0)
+	}
+	ref := newRay(hr.point, hr.normal.add(randomInUnitSphere()))
+	c := rayColor(ref, world, depth-1)
+	return newColor(0.5*c.x, 0.5*c.y, 0.5*c.z)
+}
+
+func randomInUnitSphere() vector {
+	x, y, z := 0.0, 0.0, 0.0
+	for true {
+		x = 2*rand.Float64() - 1
+		y = 2*rand.Float64() - 1
+		z = 2*rand.Float64() - 1
+		if x*x+y*y+z*z < 1 {
+			break
+		}
+	}
+	return newVector(x, y, z)
 }
