@@ -56,7 +56,7 @@ func rayColor(r ray, world hitters, depth int) color {
 		return newColor(0, 0, 0)
 	}
 
-	hr, ok := world.hit(r, 0, math.MaxFloat64)
+	hr, ok := world.hit(r, 0.001, math.MaxFloat64)
 	if !ok {
 		unit := r.direction.normalize()
 		x := 0.5 * (unit.y + 1)
