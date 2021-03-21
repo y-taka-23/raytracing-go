@@ -62,7 +62,7 @@ func rayColor(r ray, world hitters, depth int) color {
 		x := 0.5 * (unit.y + 1)
 		return newColor((1-x)*1.0+x*0.5, (1-x)*1.0+x*0.7, (1-x)*1.0+x*1.0)
 	}
-	ref := newRay(hr.point, hr.normal.add(randomInUnitSphere()))
+	ref := newRay(hr.point, hr.normal.add(lambertian()))
 	c := rayColor(ref, world, depth-1)
 	return newColor(0.5*c.x, 0.5*c.y, 0.5*c.z)
 }
@@ -78,4 +78,11 @@ func randomInUnitSphere() vector {
 		}
 	}
 	return newVector(x, y, z)
+}
+
+func lambertian() vector {
+	l := 2 * math.Pi * rand.Float64()
+	z := 2*rand.Float64() - 1
+	r := (1 - z*z)
+	return newVector(r*math.Cos(l), r*math.Sin(l), z)
 }
