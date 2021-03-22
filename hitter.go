@@ -37,22 +37,24 @@ func (hs hitters) hit(r ray, tMin, tMax float64) (hitRecord, bool) {
 }
 
 type hitRecord struct {
-	point  point
-	normal vector
-	t      float64
+	point    point
+	normal   vector
+	t        float64
+	material material
 }
 
-func newHitRecord(p point, v vector, t float64) hitRecord {
-	return hitRecord{point: p, normal: v, t: t}
+func newHitRecord(p point, v vector, t float64, m material) hitRecord {
+	return hitRecord{point: p, normal: v, t: t, material: m}
 }
 
 type sphere struct {
-	center point
-	radius float64
+	center   point
+	radius   float64
+	material material
 }
 
-func newSphere(p point, r float64) sphere {
-	return sphere{center: p, radius: r}
+func newSphere(p point, r float64, m material) sphere {
+	return sphere{center: p, radius: r, material: m}
 }
 
 func (s sphere) hit(r ray, tMin, tMax float64) (hitRecord, bool) {
@@ -71,14 +73,14 @@ func (s sphere) hit(r ray, tMin, tMax float64) (hitRecord, bool) {
 	if tMin < tClose && tClose < tMax {
 		p := r.at(tClose)
 		n := s.center.to(p).div(s.radius)
-		return newHitRecord(p, n, tClose), true
+		return newHitRecord(p, n, tClose, s.material), true
 	}
 
 	tFar := (-b + math.Sqrt(disc)) / (2 * a)
 	if tMin < tFar && tFar < tMax {
 		p := r.at(tFar)
 		n := s.center.to(p).div(s.radius)
-		return newHitRecord(p, n, tFar), true
+		return newHitRecord(p, n, tFar, s.material), true
 	}
 
 	return hitRecord{}, false

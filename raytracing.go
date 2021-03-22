@@ -21,8 +21,12 @@ const (
 func Run(stdout, stderr io.Writer) error {
 
 	world := newHitters().
-		add(newSphere(newPoint(0, 0, -1), 0.5)).
-		add(newSphere(newPoint(0, -100.5, -1), 100))
+		add(newSphere(
+			newPoint(0, 0, -1), 0.5,
+			newLambertian(newColor(0.7, 0.3, 0.3)))).
+		add(newSphere(
+			newPoint(0, -100.5, -1), 100,
+			newLambertian(newColor(0.8, 0.8, 0.0))))
 
 	cam := defaultCamera()
 
@@ -62,27 +66,9 @@ func rayColor(r ray, world hitters, depth int) color {
 		x := 0.5 * (unit.y + 1)
 		return newColor((1-x)*1.0+x*0.5, (1-x)*1.0+x*0.7, (1-x)*1.0+x*1.0)
 	}
-	ref := newRay(hr.point, hr.normal.add(lambertian()))
-	c := rayColor(ref, world, depth-1)
-	return newColor(0.5*c.x, 0.5*c.y, 0.5*c.z)
-}
 
-func randomInUnitSphere() vector {
-	x, y, z := 0.0, 0.0, 0.0
-	for true {
-		x = 2*rand.Float64() - 1
-		y = 2*rand.Float64() - 1
-		z = 2*rand.Float64() - 1
-		if x*x+y*y+z*z < 1 {
-			break
-		}
-	}
-	return newVector(x, y, z)
-}
-
-func lambertian() vector {
-	l := 2 * math.Pi * rand.Float64()
-	z := 2*rand.Float64() - 1
-	r := (1 - z*z)
-	return newVector(r*math.Cos(l), r*math.Sin(l), z)
+	scattered := hr.material.scatter(hr)
+	att := hr.material.attenuation()
+	c := rayColor(scattered, world, depth-1)
+	return newColor(att.x*c.x, att.y*c.y, att.z*c.z)
 }
