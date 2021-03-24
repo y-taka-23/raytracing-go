@@ -29,3 +29,21 @@ func (l lambertian) scatter(hr hitRecord) ray {
 func (l lambertian) attenuation() color {
 	return l.albedo
 }
+
+type metal struct {
+	albedo color
+}
+
+func newMetal(c color) material {
+	return metal{albedo: c}
+}
+
+func (m metal) scatter(hr hitRecord) ray {
+	v := hr.incident.direction
+	w := hr.normal.mul(v.neg().dot(hr.normal))
+	return newRay(hr.point, v.add(w.mul(2)))
+}
+
+func (m metal) attenuation() color {
+	return m.albedo
+}

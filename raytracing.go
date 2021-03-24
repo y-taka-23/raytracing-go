@@ -26,7 +26,13 @@ func Run(stdout, stderr io.Writer) error {
 			newLambertian(newColor(0.7, 0.3, 0.3)))).
 		add(newSphere(
 			newPoint(0, -100.5, -1), 100,
-			newLambertian(newColor(0.8, 0.8, 0.0))))
+			newLambertian(newColor(0.8, 0.8, 0.0)))).
+		add(newSphere(
+			newPoint(1, 0, -1), 0.5,
+			newMetal(newColor(0.8, 0.6, 0.2)))).
+		add(newSphere(
+			newPoint(-1, 0, -1), 0.5,
+			newMetal(newColor(0.8, 0.8, 0.8))))
 
 	cam := defaultCamera()
 
