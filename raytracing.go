@@ -29,10 +29,10 @@ func Run(stdout, stderr io.Writer) error {
 			newLambertian(newColor(0.8, 0.8, 0.0)))).
 		add(newSphere(
 			newPoint(1, 0, -1), 0.5,
-			newMetal(newColor(0.8, 0.6, 0.2)))).
+			newMetal(newColor(0.8, 0.6, 0.2), 1.0))).
 		add(newSphere(
 			newPoint(-1, 0, -1), 0.5,
-			newMetal(newColor(0.8, 0.8, 0.8))))
+			newMetal(newColor(0.8, 0.8, 0.8), 0.3)))
 
 	cam := defaultCamera()
 
@@ -73,7 +73,10 @@ func rayColor(r ray, world hitters, depth int) color {
 		return newColor((1-x)*1.0+x*0.5, (1-x)*1.0+x*0.7, (1-x)*1.0+x*1.0)
 	}
 
-	scattered := hr.material.scatter(hr)
+	scattered, ok := hr.material.scatter(hr)
+	if !ok {
+		return newColor(0, 0, 0)
+	}
 	att := hr.material.attenuation()
 	c := rayColor(scattered, world, depth-1)
 	return newColor(att.x*c.x, att.y*c.y, att.z*c.z)
