@@ -71,7 +71,62 @@ func (m metal) attenuation() color {
 	return m.albedo
 }
 
+type dielectric struct {
+	refractiveIndex float64
+}
+
+func newDielectric(idx float64) material {
+	return dielectric{refractiveIndex: idx}
+}
+
+func (d dielectric) scatter(hr hitRecord) (ray, bool) {
+
+	var relIdx float64
+	if hr.incident.direction.dot(hr.normal) < 0 {
+		relIdx = 1.0 / d.refractiveIndex
+	} else {
+		relIdx = d.refractiveIndex
+	}
+
+	in := hr.incident.direction
+	orthogonal := in.sub(hr.normal.mul(in.dot(hr.normal))).mul(relIdx)
+
+	if in.norm() < orthogonal.norm() {
+		reflected := reflect(hr.incident.direction, hr.normal)
+		return newRay(hr.point, reflected), true
+	}
+
+	if rand.Float64() < schlick(in, hr.normal, relIdx) {
+		reflected := reflect(hr.incident.direction, hr.normal)
+		return newRay(hr.point, reflected), true
+	}
+
+	var parallel vector
+	if hr.incident.direction.dot(hr.normal) < 0 {
+		parallel = hr.normal.mul(-math.Sqrt(in.norm() - orthogonal.norm()))
+	} else {
+		parallel = hr.normal.mul(math.Sqrt(in.norm() - orthogonal.norm()))
+	}
+
+	refracted := orthogonal.add(parallel)
+	return newRay(hr.point, refracted), true
+}
+
+func (d dielectric) attenuation() color {
+	return newColor(1, 1, 1)
+}
+
 func reflect(in vector, normal vector) vector {
 	parallel := normal.mul(in.neg().dot(normal))
 	return in.add(parallel.mul(2))
+}
+
+func schlick(in, normal vector, relIdx float64) float64 {
+	cos := in.dot(normal) / in.length()
+	if cos < 0 {
+		cos = -cos
+	}
+	r := (relIdx - 1) / (relIdx + 1)
+	r0 := r * r
+	return r0 + (1-r0)*math.Pow(1-cos, 5)
 }

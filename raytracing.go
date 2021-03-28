@@ -23,16 +23,19 @@ func Run(stdout, stderr io.Writer) error {
 	world := newHitters().
 		add(newSphere(
 			newPoint(0, 0, -1), 0.5,
-			newLambertian(newColor(0.7, 0.3, 0.3)))).
+			newLambertian(newColor(0.1, 0.2, 0.5)))).
 		add(newSphere(
 			newPoint(0, -100.5, -1), 100,
 			newLambertian(newColor(0.8, 0.8, 0.0)))).
 		add(newSphere(
 			newPoint(1, 0, -1), 0.5,
-			newMetal(newColor(0.8, 0.6, 0.2), 1.0))).
+			newMetal(newColor(0.8, 0.6, 0.2), 0.3))).
 		add(newSphere(
 			newPoint(-1, 0, -1), 0.5,
-			newMetal(newColor(0.8, 0.8, 0.8), 0.3)))
+			newDielectric(1.5))).
+		add(newSphere(
+			newPoint(-1, 0, -1), -0.45,
+			newDielectric(1.5)))
 
 	cam := defaultCamera()
 
