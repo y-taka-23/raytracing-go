@@ -31,8 +31,8 @@ func (l lambertian) attenuation() color {
 }
 
 type metal struct {
-	albedo color
-	fuzz   float64
+	albedo    color
+	fuzziness float64
 }
 
 func newMetal(c color, f float64) material {
@@ -42,18 +42,16 @@ func newMetal(c color, f float64) material {
 	if f >= 1 {
 		f = 1
 	}
-	return metal{albedo: c, fuzz: f}
+	return metal{albedo: c, fuzziness: f}
 }
 
 func (m metal) scatter(hr hitRecord) (ray, bool) {
-	v := hr.incident.direction
-	w := hr.normal.mul(v.neg().dot(hr.normal))
-	f := randomInUnitSphere().mul(m.fuzz)
-	ref := v.add(w.mul(2)).add(f)
-	if ref.dot(hr.normal) < 0 {
+	f := randomInUnitSphere().mul(m.fuzziness)
+	reflected := reflect(hr.incident.direction, hr.normal).add(f)
+	if reflected.dot(hr.normal) < 0 {
 		return ray{}, false
 	}
-	return newRay(hr.point, ref), true
+	return newRay(hr.point, reflected), true
 }
 
 func randomInUnitSphere() vector {
@@ -71,4 +69,9 @@ func randomInUnitSphere() vector {
 
 func (m metal) attenuation() color {
 	return m.albedo
+}
+
+func reflect(in vector, normal vector) vector {
+	parallel := normal.mul(in.neg().dot(normal))
+	return in.add(parallel.mul(2))
 }
