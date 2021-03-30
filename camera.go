@@ -1,33 +1,43 @@
 package raytracing
 
+import (
+	"math"
+)
+
 type camera struct {
-	position       point
-	aspectRatio    float64
-	viewportHeight float64
-	viewportWidth  float64
-	focalLength    float64
+	lookFrom          point
+	horizontal        vector
+	vertical          vector
+	toLowerLeftCorner vector
 }
 
-func defaultCamera() camera {
-	ratio := 16.0 / 9.0
-	height := 2.0
+func newCamera(lookFrom, lookAt point, viewUp vector, verticalFOV, aspectRatio float64) camera {
+
+	h := math.Tan(verticalFOV / 2)
+	viewportHeight := 2 * h
+	viewportWidth := viewportHeight * aspectRatio
+
+	w := lookAt.to(lookFrom).normalize()
+	u := viewUp.cross(w).normalize()
+	v := w.cross(u)
+
+	horizontal := u.mul(viewportWidth)
+	vertical := v.mul(viewportHeight)
+	toLowerLeftCorner := w.neg().
+		sub(horizontal.div(2)).
+		sub(vertical.div(2))
+
 	return camera{
-		position:       origin(),
-		aspectRatio:    ratio,
-		viewportWidth:  height * ratio,
-		viewportHeight: height,
-		focalLength:    1,
+		lookFrom:          lookFrom,
+		horizontal:        horizontal,
+		vertical:          vertical,
+		toLowerLeftCorner: toLowerLeftCorner,
 	}
 }
 
 func (c camera) castRay(u, v float64) ray {
-
-	horizontal := newVector(c.viewportWidth, 0, 0)
-	vertical := newVector(0, c.viewportHeight, 0)
-	toLowerLeftCorner := newVector(-c.viewportWidth/2, -c.viewportHeight/2, -c.focalLength)
-
 	return newRay(
-		c.position,
-		toLowerLeftCorner.add(horizontal.mul(u)).add(vertical.mul(v)),
+		c.lookFrom,
+		c.toLowerLeftCorner.add(c.horizontal.mul(u)).add(c.vertical.mul(v)),
 	)
 }

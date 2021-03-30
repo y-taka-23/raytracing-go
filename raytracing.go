@@ -29,7 +29,7 @@ func Run(stdout, stderr io.Writer) error {
 			newLambertian(newColor(0.8, 0.8, 0.0)))).
 		add(newSphere(
 			newPoint(1, 0, -1), 0.5,
-			newMetal(newColor(0.8, 0.6, 0.2), 0.3))).
+			newMetal(newColor(0.8, 0.6, 0.2), 0.0))).
 		add(newSphere(
 			newPoint(-1, 0, -1), 0.5,
 			newDielectric(1.5))).
@@ -37,7 +37,8 @@ func Run(stdout, stderr io.Writer) error {
 			newPoint(-1, 0, -1), -0.45,
 			newDielectric(1.5)))
 
-	cam := defaultCamera()
+	cam := newCamera(newPoint(-2, 2, 1), newPoint(0, 0, -1), newVector(0, 1, 0),
+		math.Pi/9.0, float64(imageWidth)/float64(imageHeight))
 
 	fmt.Fprintln(stdout, "P3")
 	fmt.Fprintf(stdout, "%d %d\n", imageWidth, imageHeight)
