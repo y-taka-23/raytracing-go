@@ -37,8 +37,13 @@ func Run(stdout, stderr io.Writer) error {
 			newPoint(-1, 0, -1), -0.45,
 			newDielectric(1.5)))
 
-	cam := newCamera(newPoint(-2, 2, 1), newPoint(0, 0, -1), newVector(0, 1, 0),
-		math.Pi/9.0, float64(imageWidth)/float64(imageHeight))
+	lookFrom := newPoint(3, 3, 2)
+	lookAt := newPoint(0, 0, -1)
+	viewUp := newVector(0, 1, 0)
+	aperture := 2.0
+	distToFocus := lookFrom.to(lookAt).length()
+	cam := newCamera(lookFrom, lookAt, viewUp,
+		math.Pi/9.0, aspectRatio, aperture, distToFocus)
 
 	fmt.Fprintln(stdout, "P3")
 	fmt.Fprintf(stdout, "%d %d\n", imageWidth, imageHeight)
