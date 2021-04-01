@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	aspectRatio = 16.0 / 9.0
+	aspectRatio = 4.0 / 3.0
 
-	imageWidth  = 384
+	imageWidth  = 384 * 2
 	imageHeight = int(imageWidth / aspectRatio)
 
 	samplesPerPixel = 100
@@ -20,36 +20,21 @@ const (
 
 func Run(stdout, stderr io.Writer) error {
 
-	world := newHitters().
-		add(newSphere(
-			newPoint(0, 0, -1), 0.5,
-			newLambertian(newColor(0.1, 0.2, 0.5)))).
-		add(newSphere(
-			newPoint(0, -100.5, -1), 100,
-			newLambertian(newColor(0.8, 0.8, 0.0)))).
-		add(newSphere(
-			newPoint(1, 0, -1), 0.5,
-			newMetal(newColor(0.8, 0.6, 0.2), 0.0))).
-		add(newSphere(
-			newPoint(-1, 0, -1), 0.5,
-			newDielectric(1.5))).
-		add(newSphere(
-			newPoint(-1, 0, -1), -0.45,
-			newDielectric(1.5)))
+	rand.Seed(time.Now().UnixNano())
 
-	lookFrom := newPoint(3, 3, 2)
-	lookAt := newPoint(0, 0, -1)
+	world := randomSpheres()
+
+	lookFrom := newPoint(13, 2, 3)
+	lookAt := newPoint(0, 0, 0)
 	viewUp := newVector(0, 1, 0)
-	aperture := 2.0
-	distToFocus := lookFrom.to(lookAt).length()
+	aperture := 0.1
+	distToFocus := 10.0
 	cam := newCamera(lookFrom, lookAt, viewUp,
 		math.Pi/9.0, aspectRatio, aperture, distToFocus)
 
 	fmt.Fprintln(stdout, "P3")
 	fmt.Fprintf(stdout, "%d %d\n", imageWidth, imageHeight)
 	fmt.Fprintln(stdout, 255)
-
-	rand.Seed(time.Now().UnixNano())
 
 	for j := imageHeight - 1; j >= 0; j-- {
 		for i := 0; i < imageWidth; i++ {
@@ -89,4 +74,58 @@ func rayColor(r ray, world hitters, depth int) color {
 	att := hr.material.attenuation()
 	c := rayColor(scattered, world, depth-1)
 	return newColor(att.x*c.x, att.y*c.y, att.z*c.z)
+}
+
+func randomSpheres() hitters {
+
+	world := newHitters().
+		add(newSphere(
+			newPoint(0, -1000, 0), 1000,
+			newLambertian(newColor(0.5, 0.5, 0.5))))
+
+	for a := -11; a < 11; a++ {
+		for b := -11; b < 11; b++ {
+
+			chooseMaterial := rand.Float64()
+			center := newPoint(
+				float64(a)+0.9*rand.Float64(),
+				0.2,
+				float64(b)+0.9*rand.Float64(),
+			)
+
+			if newPoint(0, 0.2, 0).to(center).length() > 0.9 &&
+				newPoint(4, 0.2, 0).to(center).length() > 0.9 &&
+				newPoint(-4, 0.2, 0).to(center).length() > 0.9 {
+				if chooseMaterial < 0.8 {
+					r1, g1, b1 := rand.Float64(), rand.Float64(), rand.Float64()
+					r2, g2, b2 := rand.Float64(), rand.Float64(), rand.Float64()
+					albedo := newColor(r1*r2, g1*g2, b1*b2)
+					world = world.add(newSphere(center, 0.2, newLambertian(albedo)))
+				} else if chooseMaterial < 0.95 {
+					albedo := newColor(
+						0.5*rand.Float64()+0.5,
+						0.5*rand.Float64()+0.5,
+						0.5*rand.Float64()+0.5,
+					)
+					fizz := rand.Float64() * 0.5
+					world = world.add(newSphere(center, 0.2, newMetal(albedo, fizz)))
+				} else {
+					world = world.add(newSphere(center, 0.2, newDielectric(1.5)))
+				}
+			}
+		}
+	}
+
+	world = world.
+		add(newSphere(
+			newPoint(0, 1, 0), 1,
+			newDielectric(1.5))).
+		add(newSphere(
+			newPoint(-4, 1, 0), 1,
+			newLambertian(newColor(0.4, 0.2, 0.1)))).
+		add(newSphere(
+			newPoint(4, 1, 0), 1,
+			newMetal(newColor(0.7, 0.6, 0.5), 0)))
+
+	return world
 }
