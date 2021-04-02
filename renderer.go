@@ -10,27 +10,74 @@ import (
 )
 
 type Renderer struct {
+	imageWidth      int
+	imageHeight     int
 	imageWriter     io.Writer
 	logWriter       io.Writer
 	samplesPerPixel int
 	maxDepth        int
-	imageWidth      int
-	imageHeight     int
 }
 
-func NewRenderer() Renderer {
+type RendererConfig struct {
+	imageWidth      int
+	imageHeight     int
+	imageWriter     io.Writer
+	logWriter       io.Writer
+	samplesPerPixel int
+	maxDepth        int
+}
 
-	aspectRatio := 4.0 / 3.0
-	imageWidth := 384 * 2
-	imageHeight := int(float64(imageWidth) / aspectRatio)
+type RendererConfigOption func(*RendererConfig)
 
-	return Renderer{
+func NewRendererConfig(width, height int, opts ...RendererConfigOption) RendererConfig {
+	cfg := RendererConfig{
+		imageWidth:      width,
+		imageHeight:     height,
 		imageWriter:     os.Stdout,
 		logWriter:       os.Stderr,
 		samplesPerPixel: 100,
 		maxDepth:        50,
-		imageWidth:      imageWidth,
-		imageHeight:     imageHeight,
+	}
+
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+
+	return cfg
+}
+
+func NewRenderer(cfg RendererConfig) Renderer {
+	return Renderer{
+		imageWidth:      cfg.imageWidth,
+		imageHeight:     cfg.imageHeight,
+		imageWriter:     cfg.imageWriter,
+		logWriter:       cfg.logWriter,
+		samplesPerPixel: cfg.samplesPerPixel,
+		maxDepth:        cfg.maxDepth,
+	}
+}
+
+func WithImageWriter(w io.Writer) RendererConfigOption {
+	return func(cfg *RendererConfig) {
+		cfg.imageWriter = w
+	}
+}
+
+func WithLogWriter(w io.Writer) RendererConfigOption {
+	return func(cfg *RendererConfig) {
+		cfg.logWriter = w
+	}
+}
+
+func WithSamplesPerPixel(samples int) RendererConfigOption {
+	return func(cfg *RendererConfig) {
+		cfg.samplesPerPixel = samples
+	}
+}
+
+func WithMaxTraceDepth(depth int) RendererConfigOption {
+	return func(cfg *RendererConfig) {
+		cfg.maxDepth = depth
 	}
 }
 

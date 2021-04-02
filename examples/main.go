@@ -7,11 +7,14 @@ import (
 )
 
 func main() {
-	scene := getScene()
-	camera := getCamera()
-	renderer := raytracing.NewRenderer()
 
-	renderer.Render(scene, camera)
+	width, height := 384, 282
+
+	scene := getScene()
+	camera := getCamera(width, height)
+
+	cfg := raytracing.NewRendererConfig(width, height)
+	raytracing.NewRenderer(cfg).Render(scene, camera)
 }
 
 func getScene() raytracing.Scene {
@@ -34,15 +37,17 @@ func getScene() raytracing.Scene {
 	return *scene
 }
 
-func getCamera() raytracing.Camera {
+func getCamera(width, height int) raytracing.Camera {
 
-	lookFrom := raytracing.NewPoint(13, 2, 3)
-	lookAt := raytracing.NewPoint(2, 0.75, 0)
-	viewUp := raytracing.NewVector(0, 1, 0)
-	aspectRatio := 4.0 / 3.0
-	aperture := 0.1
-	distToFocus := 10.0
+	cfg := raytracing.NewCameraConfig(
+		float64(width)/float64(height),
+		raytracing.WithPointOfView(
+			raytracing.NewPoint(13, 2, 3),
+			raytracing.NewPoint(2, 0.75, 0)),
+		raytracing.WithVerticalFOV(math.Pi/9.0),
+		raytracing.WithAperture(0.1),
+		raytracing.WithFocusDistance(10.0),
+	)
 
-	return raytracing.NewCamera(lookFrom, lookAt, viewUp,
-		math.Pi/9.0, aspectRatio, aperture, distToFocus)
+	return raytracing.NewCamera(cfg)
 }
