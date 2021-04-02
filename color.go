@@ -6,13 +6,13 @@ import (
 	"math"
 )
 
-type color vector
+type Color Vector
 
-func newColor(r, g, b float64) color {
-	return color(newVector(r, g, b))
+func NewColor(r, g, b float64) Color {
+	return Color(NewVector(r, g, b))
 }
 
-func writeColor(w io.Writer, c color, samples int) {
+func writeColor(w io.Writer, c Color, samples int) {
 
 	clamp := func(x, min, max float64) float64 {
 		if x < min {

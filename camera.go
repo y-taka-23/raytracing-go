@@ -5,18 +5,18 @@ import (
 	"math/rand"
 )
 
-type camera struct {
-	lookFrom          point
-	horizontal        vector
-	vertical          vector
-	toLowerLeftCorner vector
-	u                 vector
-	v                 vector
+type Camera struct {
+	lookFrom          Point
+	horizontal        Vector
+	vertical          Vector
+	toLowerLeftCorner Vector
+	u                 Vector
+	v                 Vector
 	lensRadius        float64
 }
 
-func newCamera(lookFrom, lookAt point, viewUp vector,
-	verticalFOV, aspectRatio, aperture, focusDistance float64) camera {
+func NewCamera(lookFrom, lookAt Point, viewUp Vector,
+	verticalFOV, aspectRatio, aperture, focusDistance float64) Camera {
 
 	h := math.Tan(verticalFOV / 2)
 	viewportHeight := 2 * h
@@ -32,7 +32,7 @@ func newCamera(lookFrom, lookAt point, viewUp vector,
 		sub(horizontal.div(2)).
 		sub(vertical.div(2))
 
-	return camera{
+	return Camera{
 		lookFrom:          lookFrom,
 		horizontal:        horizontal,
 		vertical:          vertical,
@@ -43,7 +43,7 @@ func newCamera(lookFrom, lookAt point, viewUp vector,
 	}
 }
 
-func (c camera) castRay(s, t float64) ray {
+func (c Camera) castRay(s, t float64) ray {
 	r := randomInUnitDisk().mul(c.lensRadius)
 	offset := c.u.mul(r.x).add(c.v.mul(r.y))
 	return newRay(
@@ -54,7 +54,7 @@ func (c camera) castRay(s, t float64) ray {
 	)
 }
 
-func randomInUnitDisk() vector {
+func randomInUnitDisk() Vector {
 	x, y := 0.0, 0.0
 	for true {
 		x = 2*rand.Float64() - 1
@@ -63,5 +63,5 @@ func randomInUnitDisk() vector {
 			break
 		}
 	}
-	return newVector(x, y, 0.0)
+	return NewVector(x, y, 0.0)
 }

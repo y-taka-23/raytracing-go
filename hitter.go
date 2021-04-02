@@ -4,27 +4,28 @@ import (
 	"math"
 )
 
-type hitter interface {
+type Hitter interface {
 	hit(r ray, tMin, tMax float64) (hitRecord, bool)
 }
 
-type hitters struct {
-	hitters []hitter
+type Scene struct {
+	hitters []Hitter
 }
 
-func newHitters() hitters {
-	return hitters{hitters: []hitter{}}
+func NewScene() *Scene {
+	return &Scene{hitters: []Hitter{}}
 }
 
-func (hs hitters) add(h hitter) hitters {
-	return hitters{hitters: append(hs.hitters, h)}
+func (s *Scene) Add(h Hitter) *Scene {
+	s.hitters = append(s.hitters, h)
+	return s
 }
 
-func (hs hitters) hit(r ray, tMin, tMax float64) (hitRecord, bool) {
+func (s Scene) hit(r ray, tMin, tMax float64) (hitRecord, bool) {
 	hitAnything := false
 	closestT := math.MaxFloat64
 	var closest hitRecord
-	for _, h := range hs.hitters {
+	for _, h := range s.hitters {
 		if hr, ok := h.hit(r, tMin, tMax); ok {
 			hitAnything = true
 			if hr.t < closestT {
@@ -37,24 +38,24 @@ func (hs hitters) hit(r ray, tMin, tMax float64) (hitRecord, bool) {
 }
 
 type hitRecord struct {
-	point    point
-	normal   vector
+	point    Point
+	normal   Vector
 	incident ray
 	t        float64
-	material material
+	material Material
 }
 
-func newHitRecord(p point, v vector, r ray, t float64, m material) hitRecord {
+func newHitRecord(p Point, v Vector, r ray, t float64, m Material) hitRecord {
 	return hitRecord{point: p, normal: v, incident: r, t: t, material: m}
 }
 
 type sphere struct {
-	center   point
+	center   Point
 	radius   float64
-	material material
+	material Material
 }
 
-func newSphere(p point, r float64, m material) sphere {
+func NewSphere(p Point, r float64, m Material) Hitter {
 	return sphere{center: p, radius: r, material: m}
 }
 

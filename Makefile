@@ -1,8 +1,11 @@
-.PHONY: build clean
+.PHONY: build examples clean
 
 build:
+	go build
+
+examples:
 	mkdir -p ./bin/
-	go build -o ./bin/raytracing cmd/raytracing/main.go
+	go build -o ./bin/example ./examples/main.go
 
 clean:
 	rm -rf ./bin/
