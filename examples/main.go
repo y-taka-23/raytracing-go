@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"os"
 
 	"github.com/y-taka-23/raytracing-go"
 )
@@ -10,7 +9,9 @@ import (
 func main() {
 	scene := getScene()
 	camera := getCamera()
-	raytracing.Render(os.Stdout, os.Stderr, scene, camera)
+	renderer := raytracing.NewRenderer()
+
+	renderer.Render(scene, camera)
 }
 
 func getScene() raytracing.Scene {
